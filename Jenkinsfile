@@ -8,10 +8,23 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the repository
+                git 'https://github.com/amitku13/ec2_fromjenkins_terraform.git'
+            }
+        }
+
         stage('Install Terraform') {
             steps {
+                // Check if Terraform is installed, if not, install it
                 sh '''
-                    terraform --version || sudo yum -y install terraform
+                    if ! command -v terraform &> /dev/null; then
+                        echo "Terraform not found. Installing..."
+                        sudo yum -y install terraform
+                    else
+                        echo "Terraform is already installed."
+                    fi
                 '''
             }
         }
@@ -19,9 +32,8 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
-                    sh '''
-                        terraform init
-                    '''
+                    // Initialize Terraform
+                    sh 'terraform init'
                 }
             }
         }
@@ -30,9 +42,7 @@ pipeline {
             steps {
                 dir('terraform') {
                     // Running terraform apply command to provision the instance
-                    sh '''
-                        terraform apply -auto-approve
-                    '''
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
@@ -40,9 +50,8 @@ pipeline {
         stage('Show Outputs') {
             steps {
                 dir('terraform') {
-                    sh '''
-                        terraform output
-                    '''
+                    // Show Terraform outputs
+                    sh 'terraform output'
                 }
             }
         }
@@ -50,8 +59,8 @@ pipeline {
 
     post {
         always {
+            // Clean the workspace after the build
             cleanWs()
         }
     }
 }
-
