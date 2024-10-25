@@ -70,3 +70,6 @@ pipeline {
         }
     }
 }
+withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+    // AWS CLI or Terraform commands here
+}
