@@ -2,38 +2,36 @@ pipeline {
     agent any
 
     environment {
-        // Add AWS credentials in Jenkins (ensure they are correctly configured)
+        // Use your actual credentials ID here
         AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
     }
 
     stages {
-        stage('Checkout') {
+        stage('Install Terraform') {
             steps {
-                // Checkout the repository
-                git 'https://github.com/amitku13/ec2_fromjenkins_terraform.git'
+                script {
+                    // Check if Terraform is installed; if not, install it
+                    sh '''
+                        terraform --version || sudo yum -y install terraform
+                    '''
+                }
             }
         }
 
-        stage('Install Terraform') {
+        stage('Checkout SCM') {
             steps {
-                // Check if Terraform is installed, if not, install it
-                sh '''
-                    if ! command -v terraform &> /dev/null; then
-                        echo "Terraform not found. Installing..."
-                        sudo yum -y install terraform
-                    else
-                        echo "Terraform is already installed."
-                    fi
-                '''
+                // Checkout code from SCM
+                checkout scm
             }
         }
 
         stage('Terraform Init') {
             steps {
                 dir('terraform') {
-                    // Initialize Terraform
-                    sh 'terraform init'
+                    sh '''
+                        terraform init
+                    '''
                 }
             }
         }
@@ -41,8 +39,10 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('terraform') {
-                    // Running terraform apply command to provision the instance
-                    sh 'terraform apply -auto-approve'
+                    // Run terraform apply command to provision the instance
+                    sh '''
+                        terraform apply -auto-approve
+                    '''
                 }
             }
         }
@@ -50,8 +50,9 @@ pipeline {
         stage('Show Outputs') {
             steps {
                 dir('terraform') {
-                    // Show Terraform outputs
-                    sh 'terraform output'
+                    sh '''
+                        terraform output
+                    '''
                 }
             }
         }
@@ -59,8 +60,10 @@ pipeline {
 
     post {
         always {
-            // Clean the workspace after the build
-            cleanWs()
+            // Clean the workspace
+            node {
+                cleanWs()
+            }
         }
     }
 }
