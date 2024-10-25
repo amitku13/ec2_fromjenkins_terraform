@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Use your actual credentials ID here
+        // Ensure these credentials IDs match what you set up in Jenkins
         AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id')
         AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
     }
@@ -61,7 +61,12 @@ pipeline {
     post {
         always {
             // Clean the workspace
-            cleanWs()
+            // Wrapping the entire post action in a node block
+            script {
+                node {
+                    cleanWs()
+                }
+            }
         }
     }
 }
