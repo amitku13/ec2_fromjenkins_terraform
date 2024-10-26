@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     parameters {
         string(name: 'AMI_ID', defaultValue: 'ami-06b21ccaeff8cd686', description: 'The AMI ID to use for the instance')
         string(name: 'INSTANCE_TAG_NAME', defaultValue: 'terraform', description: 'The name to assign to the instance')
@@ -7,11 +8,20 @@ pipeline {
         string(name: 'VPC_ID', defaultValue: 'vpc-006993ee517a74e91', description: 'The VPC ID to use')
         string(name: 'VPC_CIDR', defaultValue: '172.31.0.0/16', description: 'The CIDR block of the VPC')
     }
+
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // Use Jenkins credentials
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Use Jenkins credentials
+        // Replace 'aws-access-key-id' and 'aws-secret-access-key' with your actual credentials ID in Jenkins
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')  // Replace with your access key credential ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')  // Replace with your secret key credential ID
     }
+
     stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('AMI Configuration') {
             steps {
                 script {
@@ -19,6 +29,7 @@ pipeline {
                 }
             }
         }
+
         stage('Subnet Configuration') {
             steps {
                 script {
@@ -26,6 +37,7 @@ pipeline {
                 }
             }
         }
+
         stage('VPC Configuration') {
             steps {
                 script {
@@ -34,6 +46,7 @@ pipeline {
                 }
             }
         }
+
         stage('Terraform Init') {
             steps {
                 script {
@@ -41,6 +54,7 @@ pipeline {
                 }
             }
         }
+
         stage('Terraform Plan') {
             steps {
                 script {
@@ -55,6 +69,7 @@ pipeline {
                 }
             }
         }
+
         stage('Terraform Apply') {
             steps {
                 script {
@@ -68,6 +83,18 @@ pipeline {
                     """
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            // Clean up actions, if any
+            echo 'Pipeline finished!'
+        }
+
+        failure {
+            // Actions to perform on failure
+            echo 'Pipeline failed!'
         }
     }
 }
