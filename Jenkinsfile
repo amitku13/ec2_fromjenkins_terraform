@@ -37,35 +37,61 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    bat 'cd C:\\terraform\\jenkins && terraform init'
+                    if (isUnix()) {
+                        sh 'cd /path/to/terraform/jenkins && terraform init'
+                    } else {
+                        bat 'cd C:\\terraform\\jenkins && terraform init'
+                    }
                 }
             }
         }
         stage('Terraform Plan') {
             steps {
                 script {
-                    bat """
-                    cd C:\\terraform\\jenkins && terraform plan \
-                        -var="ami_id=${params.AMI_ID}" \
-                        -var="instance_tag_name=${params.INSTANCE_TAG_NAME}" \
-                        -var="subnet_id=${params.SUBNET_ID}" \
-                        -var="vpc_id=${params.VPC_ID}" \
-                        -var="vpc_cidr=${params.VPC_CIDR}"
-                    """
+                    if (isUnix()) {
+                        sh """
+                        cd /path/to/terraform/jenkins && terraform plan \
+                            -var="ami_id=${params.AMI_ID}" \
+                            -var="instance_tag_name=${params.INSTANCE_TAG_NAME}" \
+                            -var="subnet_id=${params.SUBNET_ID}" \
+                            -var="vpc_id=${params.VPC_ID}" \
+                            -var="vpc_cidr=${params.VPC_CIDR}"
+                        """
+                    } else {
+                        bat """
+                        cd C:\\terraform\\jenkins && terraform plan \
+                            -var="ami_id=${params.AMI_ID}" \
+                            -var="instance_tag_name=${params.INSTANCE_TAG_NAME}" \
+                            -var="subnet_id=${params.SUBNET_ID}" \
+                            -var="vpc_id=${params.VPC_ID}" \
+                            -var="vpc_cidr=${params.VPC_CIDR}"
+                        """
+                    }
                 }
             }
         }
         stage('Terraform Apply') {
             steps {
                 script {
-                    bat """
-                    cd C:\\terraform\\jenkins && terraform apply -auto-approve \
-                        -var="ami_id=${params.AMI_ID}" \
-                        -var="instance_tag_name=${params.INSTANCE_TAG_NAME}" \
-                        -var="subnet_id=${params.SUBNET_ID}" \
-                        -var="vpc_id=${params.VPC_ID}" \
-                        -var="vpc_cidr=${params.VPC_CIDR}"
-                    """
+                    if (isUnix()) {
+                        sh """
+                        cd /path/to/terraform/jenkins && terraform apply -auto-approve \
+                            -var="ami_id=${params.AMI_ID}" \
+                            -var="instance_tag_name=${params.INSTANCE_TAG_NAME}" \
+                            -var="subnet_id=${params.SUBNET_ID}" \
+                            -var="vpc_id=${params.VPC_ID}" \
+                            -var="vpc_cidr=${params.VPC_CIDR}"
+                        """
+                    } else {
+                        bat """
+                        cd C:\\terraform\\jenkins && terraform apply -auto-approve \
+                            -var="ami_id=${params.AMI_ID}" \
+                            -var="instance_tag_name=${params.INSTANCE_TAG_NAME}" \
+                            -var="subnet_id=${params.SUBNET_ID}" \
+                            -var="vpc_id=${params.VPC_ID}" \
+                            -var="vpc_cidr=${params.VPC_CIDR}"
+                        """
+                    }
                 }
             }
         }
