@@ -8,8 +8,8 @@ pipeline {
         string(name: 'VPC_CIDR', defaultValue: '172.31.0.0/16', description: 'The CIDR block of the VPC')
     }
     environment {
-        AWS_ACCESS_KEY_ID = 'AKIA4MTWHNYF5JLOJ35Y'
-        AWS_SECRET_ACCESS_KEY = '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'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // Use Jenkins credentials
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Use Jenkins credentials
     }
     stages {
         stage('AMI Configuration') {
@@ -37,7 +37,6 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    // Use the correct workspace path
                     sh 'cd ${WORKSPACE} && terraform init'
                 }
             }
